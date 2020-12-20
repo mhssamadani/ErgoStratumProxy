@@ -22,5 +22,5 @@ then update client.js for configuration server address and port and ...
 then start proxy
 
 ```
-npm start
+node client.js
 ```
