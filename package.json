@@ -1,0 +1,7 @@
+{
+  "name": "client",
+  "version": "1.0.0",
+  "dependencies": {
+    "stratum-client": "^1.1.0"
+  }
+}
