@@ -58,8 +58,9 @@ const handle_mining_candidate = (request, response) => {
     var res = JSON.stringify({
         msg: job.coinb1,
         b: "<b_value>",
-        prefix: job.extraNonce1,
-        size: job.extraNonce2Size
+        extraNonce1: job.extraNonce1,
+        extraNonce2Size: job.extraNonce2Size,
+        height: job.prevhash
     });
     res = res.replace("\"<b_value>\"", job.nbits);
     response.write(res);
