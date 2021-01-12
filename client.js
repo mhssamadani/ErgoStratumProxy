@@ -116,7 +116,7 @@ const server = http.createServer((request, response) => {
         case '/mining/solution':
             handle_submit_solution(request, response);
             break;
-        case '/miniدg/job/completed':
+        case '/mining/job/completed':
             handle_job_completed(request, response);
     }
 })
