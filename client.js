@@ -38,7 +38,7 @@ const Client = client({
         //         .replace("<ExtraNonce2>", options.extranonce2)
         //         .replace("<ntime>", options.ntime)
         //         .replace("<nonce>", options.nonce));
-        if(newWork.wasClean){
+        if (newWork.wasClean) {
             while (jobs.length)
                 jobs.pop()
         }
@@ -53,52 +53,71 @@ const Client = client({
 });
 
 const handle_mining_candidate = (request, response) => {
-    response.writeHead(200, { 'Content-Type': 'application/json' });
+    response.writeHead(200, {'Content-Type': 'application/json'});
     var job = jobs[0];
-    var res = JSON.stringify({
-        msg: job.coinb1,
-        b: "<b_value>",
-        extraNonce1: job.extraNonce1,
-        extraNonce2Size: job.extraNonce2Size,
-        height: job.prevhash
-    });
-    res = res.replace("\"<b_value>\"", job.nbits);
+    if (job) {
+        var res = JSON.stringify({
+            msg: job.coinb1,
+            b: "<b_value>",
+            extraNonce1: job.extraNonce1,
+            extraNonce2Size: job.extraNonce2Size,
+            height: job.prevhash
+        });
+        res = res.replace("\"<b_value>\"", job.nbits);
+    } else {
+        res = "{}";
+    }
     response.write(res);
-    response.end()
+    response.end();
+}
+
+const handle_job_completed = (request, response) => {
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    jobs.splice(0, 1)
+    response.write('{"status": "OK"}');
+    response.end();
 }
 
 const handle_submit_solution = (request, response) => {
     var job = jobs[0];
-    var data = "";
-    request.on('data', function (chunk) {
-        data += chunk;
-    });
-    request.on('end', function(){
-        data = JSON.parse(data);
-        var nonce = data.nonce;
-        Client.submit({
-            "worker_name": "KorkyMonster.testing",
-            "job_id": job.jobId,
-            "nonce": job.extraNonce1 + nonce,
-            "extranonce2": nonce
-        })
-        var res = JSON.stringify({
-            status: "OK",
+    if(job) {
+        var data = "";
+        request.on('data', function (chunk) {
+            data += chunk;
         });
-        response.write(res);
-        response.end()
-    });
+        request.on('end', function () {
+            data = JSON.parse(data);
+            var nonce = data.n;
+            var extraNonce2 = nonce.substr(job.extraNonce1.length)
+            Client.submit({
+                "worker_name": "KorkyMonster.testing",
+                "job_id": job.jobId,
+                "nonce": nonce,
+                "extranonce2": extraNonce2
+            })
+            var res = JSON.stringify({
+                status: "OK",
+            });
+            response.write(res);
+            response.end()
+        });
+    }else{
+        response.write('{"status": "fail"}');
+    }
 }
 
 const server = http.createServer((request, response) => {
     // You pass two more arguments for config and middleware
     // More details here: https://github.com/vercel/serve-handler#options
-    switch (request.url){
+    switch (request.url) {
         case '/mining/candidate':
             handle_mining_candidate(request, response);
             break;
         case '/mining/solution':
-            handle_submit_solution(request, response)
+            handle_submit_solution(request, response);
+            break;
+        case '/mining/job/completed':
+            handle_job_completed(request, response);
     }
 })
 
