@@ -38,11 +38,22 @@ const Client = client({
         //         .replace("<ExtraNonce2>", options.extranonce2)
         //         .replace("<ntime>", options.ntime)
         //         .replace("<nonce>", options.nonce));
-        if (newWork.wasClean) {
+
+        if (newWork.clean_jobs) {
             while (jobs.length)
                 jobs.pop()
         }
-        jobs.push(newWork);
+        let found = false;
+        for(let i=0; i<jobs.length; i++){
+            let job = jobs[i];
+            if(newWork.coinb1 === job.coinb1 && newWork.extraNonce1 === job.extraNonce1){
+                found = true;
+                break;
+            }
+        }
+        if(!found) {
+            jobs.push(newWork);
+        }
     },
     onSubmitWorkSuccess: (error, result) => {
         console.log("Yay! Our work was accepted!")
@@ -73,7 +84,7 @@ const handle_mining_candidate = (request, response) => {
 
 const handle_job_completed = (request, response) => {
     response.writeHead(200, {'Content-Type': 'application/json'});
-    jobs.splice(0, 1)
+    jobs.splice(0, 1);
     response.write('{"status": "OK"}');
     response.end();
 }
@@ -118,6 +129,10 @@ const server = http.createServer((request, response) => {
             break;
         case '/mining/job/completed':
             handle_job_completed(request, response);
+            break;
+        default:
+            response.write('{"status": "fail"}');
+            response.end();
     }
 })
 
