@@ -4,9 +4,9 @@ const http = require('http');
 jobs = [];
 
 const Client = client({
-    server: "127.0.0.1",
-    port: 3032,
-    worker: "KorkyMonster.testing",
+    server: "127.0.0.1", // update this with your pool address
+    port: 3032, // update this with your pool port
+    worker: "KorkyMonster.testing", // set your worker's name
     password: "x",
     autoReconnectOnError: true,
     onConnect: () => {
@@ -136,7 +136,7 @@ const server = http.createServer((request, response) => {
     }
 })
 
-server.listen(3000, () => {
+server.listen(3000, () => { // proxy's running port. change this if you want to run proxy on a different port. Miner listens to this port.
     console.log('Running at http://localhost:3000');
 });
 
