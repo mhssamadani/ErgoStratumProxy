@@ -9,17 +9,17 @@ and creates an http interface for miner.
 
 ## Installation
 
-first install Node v12+ and npm
+1- Install Node v12+ and npm
 
-then install package dependencies:
+2- Install package dependencies:
 
 ```
 npm install
 ```
 
-then update client.js for configuration server address and port and ...
+3- Update client.js
 
-then start proxy
+4- Start proxy
 
 ```
 node client.js
