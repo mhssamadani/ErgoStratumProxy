@@ -9,7 +9,7 @@ and creates an http interface for miner.
 
 ## Installation
 
-first install node v12+ and npm
+first install Node v12+ and npm
 
 then install package dependencies:
 
