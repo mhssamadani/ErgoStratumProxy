@@ -1,13 +1,28 @@
 const client = require('stratum-client');
 const http = require('http');
 
+const { ArgumentParser } = require('argparse');
+const { version } = require('./package.json');
+
+const parser = new ArgumentParser({
+    description: 'Exgo Stratum mining pool\'s proxy'
+});
+
+parser.add_argument('-v', '--version', {action: 'version', version});
+parser.add_argument('-s', '--server', {help: 'server ip address'});
+parser.add_argument('-p', '--port', {help: 'server listening port'});
+parser.add_argument('-u', '--worker', {help: 'worker name'});
+parser.add_argument('-w', '--password', {help: 'worker password'});
+parser.add_argument('-l', '--listen', {help: 'listening port'});
+args = parser.parse_args();
+
 jobs = [];
 
 const Client = client({
-    server: "127.0.0.1",
-    port: 3032,
-    worker: "KorkyMonster.testing",
-    password: "x",
+    server: args.server,
+    port: args.port,
+    worker: args.worker,
+    password: args.password,
     autoReconnectOnError: true,
     onConnect: () => {
         console.log('Connected to server')
@@ -136,7 +151,7 @@ const server = http.createServer((request, response) => {
     }
 })
 
-server.listen(3000, () => {
-    console.log('Running at http://localhost:3000');
+server.listen(args.listen, () => {
+    console.log('Running at http://localhost:' + args.listen);
 });
 
