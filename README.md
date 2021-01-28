@@ -24,6 +24,8 @@ npm install
 ```
 node client.js
 ```
+
+Windows users can use [this tutorial](https://adanorthpool.medium.com/ergostratumproxy-on-windows-wsl-for-mining-ergo-cryptocyrrency-to-a-mining-pool-2b42814cc474) in order to install the proxy.
 ## Usage
 
 In order to use ERGO miners with a stratum pool, this proxy is required.
