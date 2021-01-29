@@ -9,11 +9,11 @@ const parser = new ArgumentParser({
 });
 
 parser.add_argument('-v', '--version', {action: 'version', version});
-parser.add_argument('-s', '--server', {help: 'server ip address'});
-parser.add_argument('-p', '--port', {help: 'server listening port'});
-parser.add_argument('-u', '--worker', {help: 'worker name'});
-parser.add_argument('-w', '--password', {help: 'worker password'});
-parser.add_argument('-l', '--listen', {help: 'listening port'});
+parser.add_argument('-s', '--server', {help: 'server ip address', required: true});
+parser.add_argument('-p', '--port', {help: 'server listening port', required: true});
+parser.add_argument('-u', '--worker', {help: 'worker name', required: true});
+parser.add_argument('-w', '--password', {help: 'worker password', default: 'x'});
+parser.add_argument('-l', '--listen', {help: 'listening port', default: 3000});
 args = parser.parse_args();
 
 jobs = [];
