@@ -26,7 +26,7 @@ In order to use ERGO miners with a stratum pool, this proxy is required.
 
 ![](https://raw.githubusercontent.com/mhssamadani/ErgoStratumProxy/main/img/arguments.png)
 
-  - In these arguments listening port (-l) and password (-W) are optional.
+  - In these arguments listening port (-l) and password (-w) are optional.
 - Start proxy
 ```
 node client.js -s <POOL_ADDRESS> -p <POOL_PORT> -u <WORKER_NAME>
