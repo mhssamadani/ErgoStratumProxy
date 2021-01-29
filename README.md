@@ -1,4 +1,4 @@
-# Simple Stratum Mining Proxy
+# Simple Stratum Mining Proxy for Ergo
 
 The current version of ergo miners only support http request and response.
 
@@ -26,7 +26,8 @@ In order to use ERGO miners with a stratum pool, this proxy is required.
 
 ![](https://raw.githubusercontent.com/mhssamadani/ErgoStratumProxy/main/img/arguments.png)
 
-  - In these arguments listening port (-l) and password (-w) are optional.
+  - Among these arguments, listening port (-l) and password (-w) are optional.
+
 - Start proxy
 ```
 node client.js -s <POOL_ADDRESS> -p <POOL_PORT> -u <WORKER_NAME>
@@ -34,5 +35,6 @@ node client.js -s <POOL_ADDRESS> -p <POOL_PORT> -u <WORKER_NAME>
 
 ![](https://raw.githubusercontent.com/mhssamadani/ErgoStratumProxy/main/img/start.png)
 
-- In the miner's config file set node address to the proxy's address
- (by default this address is: ```{ "node" : "http://127.0.0.1:3000" }```)
+## Miner Configuration
+- In the miner's config file `config.json` set node address to the proxy's address
+ (by default this address is: ```{ "node" : "http://127.0.0.1:3000" }```, unless you have changed the listening port)
