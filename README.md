@@ -34,5 +34,6 @@ node client.js -s <POOL_ADDRESS> -p <POOL_PORT> -u <WORKER_NAME>
 
 ![](https://raw.githubusercontent.com/mhssamadani/ErgoStratumProxy/main/img/start.png)
 
-- In the miner's config file set node address to the proxy's address
- (by default this address is: ```{ "node" : "http://127.0.0.1:3000" }```)
+## Miner Configuration
+- In the miner's config file `config.json` set node address to the proxy's address
+ (by default this address is: ```{ "node" : "http://127.0.0.1:3000" }```, unless you have changed the listening port)
