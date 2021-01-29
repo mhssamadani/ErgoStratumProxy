@@ -5,7 +5,7 @@ const { ArgumentParser } = require('argparse');
 const { version } = require('./package.json');
 
 const parser = new ArgumentParser({
-    description: 'Exgo Stratum mining pool\'s proxy'
+    description: 'Ergo Stratum mining pool\'s proxy'
 });
 
 parser.add_argument('-v', '--version', {action: 'version', version});
