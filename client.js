@@ -1,5 +1,6 @@
 const client = require('stratum-client');
 const http = require('http');
+require('bignum');
 
 const { ArgumentParser } = require('argparse');
 const { version } = require('./package.json');
@@ -89,7 +90,7 @@ const handle_mining_candidate = (request, response) => {
             extraNonce2Size: job.extraNonce2Size,
             height: job.prevhash
         });
-        res = res.replace("\"<b_value>\"", job.nbits);
+        res = res.replace("\"<b_value>\"", (BigInt(job.nbits) - BigInt(1)) * BigInt(job.miningDiff));
     } else {
         res = "{}";
     }
