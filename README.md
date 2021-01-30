@@ -30,7 +30,8 @@ See other options by running with `-h` argument
 - In the miner's config file `config.json` set node address to the proxy's address
  (by default this address is: ```{ "node" : "http://127.0.0.1:3000" }```, unless you have changed the listening port)
 
-# Build from Source
+
+# Build
 Windows users can use [this tutorial](https://adanorthpool.medium.com/ergostratumproxy-on-windows-wsl-for-mining-ergo-cryptocyrrency-to-a-mining-pool-2b42814cc474) in order to install the proxy.
 
 1- Install Node v12+ and npm
