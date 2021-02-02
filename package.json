@@ -4,7 +4,6 @@
   "dependencies": {
     "argparse": "^2.0.1",
     "big-integer": "^1.6.48",
-    "bignum": "^0.13.1",
     "stratum-client": "^1.1.0"
   }
 }
