@@ -1,6 +1,6 @@
 const client = require('stratum-client');
 const http = require('http');
-var BigInt = require("big-integer");
+const BigInt = require("big-integer");
 
 const { ArgumentParser } = require('argparse');
 const { version } = require('./package.json');
