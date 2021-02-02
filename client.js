@@ -90,7 +90,7 @@ const handle_mining_candidate = (request, response) => {
             extraNonce2Size: job.extraNonce2Size,
             height: job.prevhash
         });
-        const b_value = BigInt(job.miningDiff) !== BigInt(0) ? (BigInt(job.nbits).minus(BigInt(1))).multiply(BigInt(job.miningDiff)) : BigInt(job.nbits)
+        const b_value = BigInt(job.miningDiff) !== BigInt(0) ? (BigInt(job.nbits).minus(BigInt(1))).multiply(BigInt(job.miningDiff)) : BigInt(job.nbits);
         res = res.replace("\"<b_value>\"",
             b_value.toString()
         );
