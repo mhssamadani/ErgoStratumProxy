@@ -1,19 +1,20 @@
 const client = require('stratum-client');
 const http = require('http');
+require('bignum');
 
 const { ArgumentParser } = require('argparse');
 const { version } = require('./package.json');
 
 const parser = new ArgumentParser({
-    description: 'Exgo Stratum mining pool\'s proxy'
+    description: 'Ergo Stratum mining pool\'s proxy'
 });
 
 parser.add_argument('-v', '--version', {action: 'version', version});
-parser.add_argument('-s', '--server', {help: 'server ip address'});
-parser.add_argument('-p', '--port', {help: 'server listening port'});
-parser.add_argument('-u', '--worker', {help: 'worker name'});
-parser.add_argument('-w', '--password', {help: 'worker password'});
-parser.add_argument('-l', '--listen', {help: 'listening port'});
+parser.add_argument('-s', '--server', {help: 'server ip address', required: true});
+parser.add_argument('-p', '--port', {help: 'server listening port', required: true});
+parser.add_argument('-u', '--worker', {help: 'worker name', required: true});
+parser.add_argument('-w', '--password', {help: 'worker password', default: 'x'});
+parser.add_argument('-l', '--listen', {help: 'listening port', default: 3000});
 args = parser.parse_args();
 
 jobs = [];
@@ -89,7 +90,9 @@ const handle_mining_candidate = (request, response) => {
             extraNonce2Size: job.extraNonce2Size,
             height: job.prevhash
         });
-        res = res.replace("\"<b_value>\"", job.nbits);
+        res = res.replace("\"<b_value>\"",
+            BigInt(job.miningDiff) !== BigInt(0) ? (BigInt(job.nbits) - BigInt(1)) * BigInt(job.miningDiff) : BigInt(job.nbits)
+        );
     } else {
         res = "{}";
     }
@@ -116,7 +119,7 @@ const handle_submit_solution = (request, response) => {
             var nonce = data.n;
             var extraNonce2 = nonce.substr(job.extraNonce1.length)
             Client.submit({
-                "worker_name": "KorkyMonster.testing",
+                "worker_name": args.worker,
                 "job_id": job.jobId,
                 "nonce": nonce,
                 "extranonce2": extraNonce2
