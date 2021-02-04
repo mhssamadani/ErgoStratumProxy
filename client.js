@@ -1,6 +1,7 @@
 const client = require('stratum-client');
 const http = require('http');
 const BigInt = require("big-integer");
+const chalk = require('chalk');
 
 const { ArgumentParser } = require('argparse');
 const { version } = require('./package.json');
@@ -18,6 +19,24 @@ parser.add_argument('-l', '--listen', {help: 'listening port', default: 3000});
 args = parser.parse_args();
 
 jobs = [];
+acceptedShares = 0;
+rejectedShares = 0;
+startTime = new Date();
+
+const showStats = () => {
+    let currentTime = new Date();
+    let timeDiff = (currentTime - startTime) / 1000;
+    let timeHours = Math.floor(timeDiff / 3600);
+    let timeMinutes = Math.floor((timeDiff - (timeHours * 3600)) / 60);
+    if(timeMinutes < 10) {
+        timeMinutes = `0${timeMinutes}`;
+    }
+    console.log(chalk.cyanBright(`\n----------------------------------------`));
+    console.log(chalk.cyanBright(`Accepted shares: ${acceptedShares}`));
+    console.log(chalk.cyanBright(`Rejected shares: ${rejectedShares}`));
+    console.log(chalk.cyanBright(`Time elapsed: ${timeHours}:${timeMinutes}`));
+    console.log(chalk.cyanBright(`----------------------------------------\n`));
+}
 
 const Client = client({
     server: args.server,
@@ -26,28 +45,29 @@ const Client = client({
     password: args.password,
     autoReconnectOnError: true,
     onConnect: () => {
-        console.log('Connected to server')
+        console.log(chalk.greenBright('[CONNECTION] Connected to server.'))
+        setInterval(() => { showStats() }, 1000 * 60);
     },
     onClose: () => {
-        console.log('Connection closed')
+        console.log(chalk.red('[CONNECTION] Disconnected from server.'))
     },
     onError: (error) => {
-        console.log('Error', error.message)
+        console.log(chalk.red(`[ERROR] ${error.message}`))
     },
     onAuthorizeSuccess: () => {
-        console.log('Worker authorized')
+        console.log(chalk.greenBright('[WORKER] Worker authorized.'))
     },
     onAuthorizeFail: () => {
-        console.log('WORKER FAILED TO AUTHORIZE OH NOOOOOO')
+        console.log(chalk.red('[WORKER] Unable to authorize worker.'))
     },
     onNewDifficulty: (newDiff) => {
-        console.log('New difficulty', newDiff)
+        console.log(chalk.cyanBright(`[DIFFICULTY] New difficulty: ${newDiff}`))
     },
     onSubscribe: (subscribeData) => {
-        console.log('[Subscribe]', subscribeData)
+        console.log(chalk.cyanBright(`[SUBSCRIBE] Nonce: ${subscribeData.extraNonce1}, nonce size: ${subscribeData.extraNonce2Size}`))
     },
     onNewMiningWork: (newWork) => {
-        console.log('[New Work]', newWork)
+        console.log('[JOB]', `New job received. Job ID: ${newWork.jobId}, difficulty: ${newWork.miningDiff}, height: ${newWork.prevhash}`);
         // options.client.write(
         //     submitWork.replace("<worker.name>", options.worker_name)
         //         .replace("<jobID>", options.job_id)
@@ -72,10 +92,12 @@ const Client = client({
         }
     },
     onSubmitWorkSuccess: (error, result) => {
-        console.log("Yay! Our work was accepted!")
+        acceptedShares += 1;
+        console.log(chalk.greenBright('[SHARE] Share accepted.'))
     },
     onSubmitWorkFail: (error, result) => {
-        console.log("Oh no! Our work was refused because: " + error)
+        rejectedShares += 1;
+        console.log(chalk.red(`[SHARE] Share rejected. ${error}`))
     },
 });
 
@@ -156,6 +178,8 @@ const server = http.createServer((request, response) => {
 })
 
 server.listen(args.listen, () => {
-    console.log('Running at http://localhost:' + args.listen);
+    console.log(chalk.yellowBright('Ergo Stratum Proxy'));
+    console.log(chalk.yellowBright(`Running at http://localhost:${args.listen}`));
+    console.log(chalk.yellowBright('--------------------------------------------------\n'));
 });
 
