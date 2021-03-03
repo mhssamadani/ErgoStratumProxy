@@ -29,6 +29,8 @@ const Client = client({
         console.log('Connected to server')
     },
     onClose: () => {
+        while (jobs.length)
+            jobs.pop()
         console.log('Connection closed')
     },
     onError: (error) => {
