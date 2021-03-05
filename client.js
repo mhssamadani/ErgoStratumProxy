@@ -49,6 +49,8 @@ const Client = client({
         setInterval(() => { showStats() }, 1000 * 60);
     },
     onClose: () => {
+        while (jobs.length)
+            jobs.pop()
         console.log(chalk.red('[CONNECTION] Disconnected from server.'))
     },
     onError: (error) => {
