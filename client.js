@@ -22,6 +22,7 @@ jobs = [];
 acceptedShares = 0;
 rejectedShares = 0;
 startTime = new Date();
+var statusIntervalId;
 
 const showStats = () => {
     let currentTime = new Date();
@@ -45,13 +46,14 @@ const Client = client({
     password: args.password,
     autoReconnectOnError: true,
     onConnect: () => {
-        console.log(chalk.greenBright('[CONNECTION] Connected to server.'))
-        setInterval(() => { showStats() }, 1000 * 60);
+        console.log(chalk.greenBright('[CONNECTION] Connected to server.'));
+        statusIntervalId = setInterval(() => { showStats() }, 1000 * 60);
     },
     onClose: () => {
         while (jobs.length)
-            jobs.pop()
-        console.log(chalk.red('[CONNECTION] Disconnected from server.'))
+            jobs.pop();
+        console.log(chalk.red('[CONNECTION] Disconnected from server.'));
+        clearInterval(statusIntervalId);
     },
     onError: (error) => {
         console.log(chalk.red(`[ERROR] ${error.message}`))
