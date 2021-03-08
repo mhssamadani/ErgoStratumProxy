@@ -2,9 +2,8 @@ const client = require('stratum-client');
 const http = require('http');
 const BigInt = require("big-integer");
 const chalk = require('chalk');
-
-const { ArgumentParser } = require('argparse');
-const { version } = require('./package.json');
+const {ArgumentParser} = require('argparse');
+const {version} = require('./package.json');
 
 const parser = new ArgumentParser({
     description: 'Ergo Stratum mining pool\'s proxy'
@@ -16,30 +15,38 @@ parser.add_argument('-p', '--port', {help: 'server listening port', required: tr
 parser.add_argument('-u', '--worker', {help: 'worker name', required: true});
 parser.add_argument('-w', '--password', {help: 'worker password', default: 'x'});
 parser.add_argument('-l', '--listen', {help: 'listening port', default: 3000});
+parser.add_argument('-t', '--timeout', {help: 'connection timeout', default: 300});
+
 args = parser.parse_args();
 
-jobs = [];
-acceptedShares = 0;
-rejectedShares = 0;
-startTime = new Date();
-var statusIntervalId;
+let parameters = {
+    jobs: [],
+    acceptedShares: 0,
+    rejectedShares: 0,
+    startTime: new Date(),
+    intervals: {
+        stats: null,
+        connect: null
+    },
+    client: null,
+}
 
 const showStats = () => {
     let currentTime = new Date();
-    let timeDiff = (currentTime - startTime) / 1000;
+    let timeDiff = (currentTime - parameters.startTime) / 1000;
     let timeHours = Math.floor(timeDiff / 3600);
     let timeMinutes = Math.floor((timeDiff - (timeHours * 3600)) / 60);
-    if(timeMinutes < 10) {
+    if (timeMinutes<10) {
         timeMinutes = `0${timeMinutes}`;
     }
     console.log(chalk.cyanBright(`\n----------------------------------------`));
-    console.log(chalk.cyanBright(`Accepted shares: ${acceptedShares}`));
-    console.log(chalk.cyanBright(`Rejected shares: ${rejectedShares}`));
+    console.log(chalk.cyanBright(`Accepted shares: ${parameters.acceptedShares}`));
+    console.log(chalk.cyanBright(`Rejected shares: ${parameters.rejectedShares}`));
     console.log(chalk.cyanBright(`Time elapsed: ${timeHours}:${timeMinutes}`));
     console.log(chalk.cyanBright(`----------------------------------------\n`));
 }
 
-const Client = client({
+let options = {
     server: args.server,
     port: args.port,
     worker: args.worker,
@@ -47,13 +54,26 @@ const Client = client({
     autoReconnectOnError: true,
     onConnect: () => {
         console.log(chalk.greenBright('[CONNECTION] Connected to server.'));
-        statusIntervalId = setInterval(() => { showStats() }, 1000 * 60);
+        parameters.intervals.stats = setInterval(() => {
+            showStats()
+        }, 1000 * 60);
+        if (parameters.intervals.connect !== null) {
+            clearInterval(parameters.intervals.connect);
+            parameters.intervals.connect = null;
+        }
     },
     onClose: () => {
-        while (jobs.length)
-            jobs.pop();
+        parameters.jobs = []
         console.log(chalk.red('[CONNECTION] Disconnected from server.'));
-        clearInterval(statusIntervalId);
+        if(parameters.intervals.stats) {
+            clearInterval(parameters.intervals.stats);
+        }
+        if(!parameters.intervals.connect) {
+            parameters.client.client.destroy();
+            parameters.client.shutdown();
+            parameters.client = null;
+            connect()
+        }
     },
     onError: (error) => {
         console.log(chalk.red(`[ERROR] ${error.message}`))
@@ -80,34 +100,46 @@ const Client = client({
         //         .replace("<nonce>", options.nonce));
 
         if (newWork.clean_jobs) {
-            while (jobs.length)
-                jobs.pop()
+            parameters.jobs = []
         }
         let found = false;
-        for(let i=0; i<jobs.length; i++){
-            let job = jobs[i];
-            if(newWork.coinb1 === job.coinb1 && newWork.extraNonce1 === job.extraNonce1){
+        for (let i = 0; i<parameters.jobs.length; i++) {
+            let job = parameters.jobs[i];
+            if (newWork.coinb1 === job.coinb1 && newWork.extraNonce1 === job.extraNonce1) {
                 found = true;
                 break;
             }
         }
-        if(!found) {
-            jobs.push(newWork);
+        if (!found) {
+            parameters.jobs.push(newWork);
         }
     },
     onSubmitWorkSuccess: (error, result) => {
-        acceptedShares += 1;
+        parameters.acceptedShares += 1;
         console.log(chalk.greenBright('[SHARE] Share accepted.'))
     },
     onSubmitWorkFail: (error, result) => {
-        rejectedShares += 1;
+        parameters.rejectedShares += 1;
         console.log(chalk.red(`[SHARE] Share rejected. ${error}`))
     },
-});
+};
+
+function doConnect() {
+    parameters.client = client(options);
+}
+
+function connect(runNow = false) {
+    if (runNow) {
+        doConnect();
+    }
+    parameters.intervals.connect = setInterval(() => doConnect(), args.timeout * 1000)
+}
+
+connect(true);
 
 const handle_mining_candidate = (request, response) => {
     response.writeHead(200, {'Content-Type': 'application/json'});
-    var job = jobs[0];
+    var job = parameters.jobs[0];
     if (job) {
         var res = JSON.stringify({
             msg: job.coinb1,
@@ -129,14 +161,14 @@ const handle_mining_candidate = (request, response) => {
 
 const handle_job_completed = (request, response) => {
     response.writeHead(200, {'Content-Type': 'application/json'});
-    jobs.splice(0, 1);
+    parameters.jobs.splice(0, 1);
     response.write('{"status": "OK"}');
     response.end();
 }
 
 const handle_submit_solution = (request, response) => {
-    var job = jobs[0];
-    if(job) {
+    var job = parameters.jobs[0];
+    if (job) {
         var data = "";
         request.on('data', function (chunk) {
             data += chunk;
@@ -157,7 +189,7 @@ const handle_submit_solution = (request, response) => {
             response.write(res);
             response.end()
         });
-    }else{
+    } else {
         response.write('{"status": "fail"}');
     }
 }
