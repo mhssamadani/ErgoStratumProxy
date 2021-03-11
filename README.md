@@ -49,7 +49,9 @@ In order to use ERGO miners with a stratum pool, this proxy is required.
 
 ![](https://raw.githubusercontent.com/mhssamadani/ErgoStratumProxy/main/img/arguments.png)
 
-  - Among these arguments, listening port (-l) and password (-w) are optional.
+  - Among these arguments, listening port (-l), password (-w) and timeout (-t) are optional.
+    - Argument `-l` opens a default port 3000 for listening to the miner.
+    - Argument `-t` has a default value of 300 seconds this means if disconnected proxy from the pool server, the proxy after the 300 seconds tries to connect to the pool again.
 
 - Start proxy
 ```
