@@ -51,7 +51,7 @@ let options = {
     port: args.port,
     worker: args.worker,
     password: args.password,
-    autoReconnectOnError: true,
+    autoReconnectOnError: false,
     onConnect: () => {
         console.log(chalk.greenBright('[CONNECTION] Connected to server.'));
         parameters.intervals.stats = setInterval(() => {
@@ -125,6 +125,9 @@ let options = {
 };
 
 function doConnect() {
+    if(parameters.client){
+        parameters.client.shutdown();
+    }
     parameters.client = client(options);
 }
 
