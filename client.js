@@ -179,13 +179,13 @@ const handle_submit_solution = (request, response) => {
         request.on('end', function () {
             data = JSON.parse(data);
             var nonce = data.n;
-            var extraNonce2 = nonce.substr(job.extraNonce1.length)
-            Client.submit({
+            var extraNonce2 = nonce.substr(job.extraNonce1.length);
+            parameters.client.submit({
                 "worker_name": args.worker,
                 "job_id": job.jobId,
                 "nonce": nonce,
                 "extranonce2": extraNonce2
-            })
+            });
             var res = JSON.stringify({
                 status: "OK",
             });
